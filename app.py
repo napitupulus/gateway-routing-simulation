@@ -114,7 +114,7 @@ C_bge = st.sidebar.slider("C (B-Gumbel only)", min_value=0.01, max_value=3.0, va
 alpha_softmax = st.sidebar.slider("Softmax Alpha", min_value=1, max_value=30, value=10, step=1)
 
 # --- Rolling Bandit Processing (by algorithm) ---
-st.header("Bandit Evaluation (Counterfactual, Regret)")
+st.header("Bandit Evaluation")
 with st.spinner('Processing...'):
     groupby_keys = ['payment_method', 'payment_channel']
     timegroups = sorted(df_view['timegroup'].unique())
@@ -280,7 +280,7 @@ with st.spinner('Processing...'):
     - Click table headers to sort, or search/filter by column as needed.
     """)
 
-    st.subheader("Result Table (Newest First, Filterable)")
+    st.subheader("Result Table")
     df_long = df_long.sort_values("Interval", ascending=False)
 
     st.data_editor(
