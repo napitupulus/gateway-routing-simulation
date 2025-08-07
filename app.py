@@ -37,16 +37,17 @@ def softmax(x, alpha=1.0):
     e_x = np.exp((x - np.max(x)) * alpha)
     return e_x / e_x.sum()
 
-currency = st.sidebar.multiselect("Currency", sorted(df_sim['currency'].dropna().unique()), default=['IDR'] if 'IDR' in df_sim['currency'].unique() else None)
-df_currency = df_sim[df_sim['currency'].isin(currency)] if currency else df_sim
+# Use selectbox for single selections only
+currency = st.sidebar.selectbox("Currency", sorted(df_sim['currency'].dropna().unique()), index=0 if 'IDR' in df_sim['currency'].unique() else 0)
+df_currency = df_sim[df_sim['currency'] == currency]
 
 pm_options = sorted(df_currency['payment_method'].dropna().unique())
-pm = st.sidebar.multiselect("Payment Method", pm_options, default=['QR_CODE'] if 'QR_CODE' in pm_options else pm_options)
-df_pm = df_currency[df_currency['payment_method'].isin(pm)] if pm else df_currency
+pm = st.sidebar.selectbox("Payment Method", pm_options, index=pm_options.index('QR_CODE') if 'QR_CODE' in pm_options else 0)
+df_pm = df_currency[df_currency['payment_method'] == pm]
 
 pc_options = sorted(df_pm['payment_channel'].dropna().unique())
-pc = st.sidebar.multiselect("Payment Channel", pc_options, default=['VIETQR'] if 'VIETQR' in pc_options else pc_options)
-df_pc = df_pm[df_pm['payment_channel'].isin(pc)] if pc else df_pm
+pc = st.sidebar.selectbox("Payment Channel", pc_options, index=pc_options.index('VIETQR') if 'VIETQR' in pc_options else 0)
+df_pc = df_pm[df_pm['payment_channel'] == pc]
 
 gw_options = sorted(df_pc['gateway'].dropna().unique())
 gw = st.sidebar.multiselect("Gateway", gw_options, default=gw_options)
@@ -74,13 +75,9 @@ default_start = datetime.date(2025, 7, 1) if min_t <= datetime.date(2025, 7, 1) 
 default_end = max_t
 start_date, end_date = st.sidebar.date_input("Date range", [default_start, default_end], min_value=min_t, max_value=max_t)
 
+# Filter to final view
 df_view = df_sim.copy()
-if currency:
-    df_view = df_view[df_view['currency'].isin(currency)]
-if pm:
-    df_view = df_view[df_view['payment_method'].isin(pm)]
-if pc:
-    df_view = df_view[df_view['payment_channel'].isin(pc)]
+df_view = df_view[(df_view['currency'] == currency) & (df_view['payment_method'] == pm) & (df_view['payment_channel'] == pc)]
 if gw:
     df_view = df_view[df_view['gateway'].isin(gw)]
 df_view = df_view[(df_view['timegroup'].dt.date >= start_date) & (df_view['timegroup'].dt.date <= end_date)]
