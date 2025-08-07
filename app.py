@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import altair as alt
 import datetime
+import seaborn as sns
 
 st.set_page_config(layout="wide")
 st.title("Payment Routing Bandit Evaluation")
@@ -223,6 +224,7 @@ with st.spinner('Processing...'):
                 'Total Transactions': total_tx,
                 'Routing Algorithm': algo_used
             })
+
     df_long = pd.DataFrame(all_long_rows)
 
     # Format percentage columns for human-readability
@@ -255,13 +257,32 @@ with st.spinner('Processing...'):
     st.subheader("Result Table")
     df_long = df_long.sort_values("Interval", ascending=False)
 
-    st.data_editor(
-        df_long,
-        use_container_width=True,
-        num_rows="dynamic",
-        column_order=list(df_long.columns),
-        hide_index=True,
-        key="result_editor"
+    # Create color palette for each unique interval
+    unique_intervals = sorted(df_long['Interval'].unique())
+    palette = sns.color_palette("Pastel1", n_colors=len(unique_intervals)).as_hex()
+    interval_color_map = dict(zip(unique_intervals, palette))
+
+    # Function to highlight rows with same interval
+    def highlight_by_interval(row):
+        color = interval_color_map.get(row['Interval'], "#FFFFFF")
+        return ['background-color: {}'.format(color)] * len(row)
+
+    # Apply style
+    styled_df = df_long.style.apply(highlight_by_interval, axis=1)
+
+
+    # st.data_editor(
+    #     df_long,
+    #     use_container_width=True,
+    #     num_rows="dynamic",
+    #     column_order=list(df_long.columns),
+    #     hide_index=True,
+    #     key="result_editor"
+    # )
+
+    st.dataframe(
+        styled_df,
+        use_container_width=True
     )
 
     csv = df_long.to_csv(index=False)
